@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../../../common/services';
 import { identifyFood } from '../services';
 import { FoodIdentification } from '../types';
@@ -31,6 +32,7 @@ export function useFoodIdentification(filePath: string): UseFoodIdentification {
       }
       if (result.data) {
         setData(result.data);
+        AsyncStorage.setItem('@last_scan', JSON.stringify(result.data)).catch(console.error);
       } else {
         setError(
           result.isNetworkError

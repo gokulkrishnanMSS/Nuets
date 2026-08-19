@@ -27,6 +27,7 @@ function RootNavigator() {
         />
         <Stack.Screen
           name="Camera"
+          
           component={CameraScreen}
           options={{ title: 'Camera' }}
         />

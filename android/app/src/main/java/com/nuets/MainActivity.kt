@@ -13,6 +13,8 @@ class MainActivity : ReactActivity() {
    * fragments are not restored twice after a process restart.
    */
   override fun onCreate(savedInstanceState: Bundle?) {
+    // Switch from the splash theme to the real app theme before React Native renders
+    setTheme(R.style.AppTheme)
     super.onCreate(null)
   }
 

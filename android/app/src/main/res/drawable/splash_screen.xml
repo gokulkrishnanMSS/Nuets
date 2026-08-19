@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Solid green background -->
+    <item>
+        <color android:color="#3a9e57"/>
+    </item>
+    <!-- Full splash image centered -->
+    <item>
+        <bitmap
+            android:src="@drawable/splash"
+            android:gravity="fill"/>
+    </item>
+</layer-list>

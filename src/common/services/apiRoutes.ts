@@ -49,5 +49,11 @@ export const API_ROUTES = {
     get identify() {
       return `${API_BASE_URL}/food/identify`;
     },
+    scans(limit: number, offset: number) {
+      return `${API_BASE_URL}/food/scans?limit=${limit}&offset=${offset}`;
+    },
+    searchScans(query: string, limit: number, offset: number) {
+      return `${API_BASE_URL}/food/scans/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`;
+    },
   },
 };
