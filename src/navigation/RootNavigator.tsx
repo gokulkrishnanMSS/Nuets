@@ -5,6 +5,8 @@ import { colors } from '../common/constants';
 import { CameraScreen } from '../modules/camera';
 import { FoodResultScreen } from '../modules/food';
 import { HomeScreen } from '../modules/home';
+import { RecipeScreen } from '../modules/recipe';
+import { SearchScreen } from '../modules/search';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -27,14 +29,23 @@ function RootNavigator() {
         />
         <Stack.Screen
           name="Camera"
-          
           component={CameraScreen}
-          options={{ title: 'Camera' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Search"
+          component={SearchScreen}
+          options={{ title: 'Search' }}
         />
         <Stack.Screen
           name="FoodResult"
           component={FoodResultScreen}
           options={{ title: 'Food' }}
+        />
+        <Stack.Screen
+          name="Recipe"
+          component={RecipeScreen}
+          options={{ title: 'Recipe' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

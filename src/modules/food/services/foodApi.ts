@@ -1,9 +1,5 @@
 import { API_ROUTES, callApi, type ApiResult } from '../../../common/services';
-import {
-  DEFAULT_FOOD_PROMPT,
-  DEFAULT_MAX_NEW_TOKENS,
-  FOOD_REQUEST_TIMEOUT_MS,
-} from '../constants';
+import { DEFAULT_FOOD_PROMPT, DEFAULT_SCAN_MODE, SCAN_MODES } from '../constants';
 import { FoodIdentification, IdentifyFoodRequest } from '../types';
 
 const fileNameOf = (filePath: string) =>
@@ -23,9 +19,12 @@ const toFileUri = (filePath: string) =>
 export async function identifyFood({
   filePath,
   prompt = DEFAULT_FOOD_PROMPT,
-  maxNewTokens = DEFAULT_MAX_NEW_TOKENS,
+  mode = DEFAULT_SCAN_MODE,
+  maxNewTokens,
+  timeoutMs,
   signal,
 }: IdentifyFoodRequest): Promise<ApiResult<FoodIdentification>> {
+  const settings = SCAN_MODES[mode] ?? SCAN_MODES[DEFAULT_SCAN_MODE];
   const form = new FormData();
   form.append('image', {
     uri: toFileUri(filePath),
@@ -33,14 +32,17 @@ export async function identifyFood({
     type: 'image/jpeg',
   } as unknown as Blob);
   form.append('prompt', prompt);
-  form.append('max_new_tokens', String(maxNewTokens));
+  form.append(
+    'max_new_tokens',
+    String(maxNewTokens ?? settings.maxNewTokens),
+  );
 
   return callApi<FoodIdentification>({
     url: API_ROUTES.food.identify,
     method: 'POST',
     data: form,
     headers: { accept: 'application/json' },
-    timeout: FOOD_REQUEST_TIMEOUT_MS,
+    timeout: timeoutMs ?? settings.timeoutMs,
     signal,
   });
 }

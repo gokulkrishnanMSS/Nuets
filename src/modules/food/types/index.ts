@@ -25,10 +25,16 @@ export type FoodIdentification = {
   device: string;
 };
 
+/** Analysis depth chosen on the camera screen. */
+export type ScanMode = 'normal' | 'pro';
+
 export type IdentifyFoodRequest = {
   /** Filesystem path from the camera (without the `file://` scheme). */
   filePath: string;
   prompt?: string;
+  /** Drives token budget and timeout; overridden by the explicit fields. */
+  mode?: ScanMode;
   maxNewTokens?: number;
+  timeoutMs?: number;
   signal?: AbortSignal;
 };

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../../../common/services';
 import { identifyFood } from '../services';
-import { FoodIdentification } from '../types';
+import { FoodIdentification, ScanMode } from '../types';
 
 type UseFoodIdentification = {
   data: FoodIdentification | null;
@@ -11,7 +11,10 @@ type UseFoodIdentification = {
   retry: () => void;
 };
 
-export function useFoodIdentification(filePath: string): UseFoodIdentification {
+export function useFoodIdentification(
+  filePath: string,
+  mode?: ScanMode,
+): UseFoodIdentification {
   const [data, setData] = useState<FoodIdentification | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +29,7 @@ export function useFoodIdentification(filePath: string): UseFoodIdentification {
     setLoading(true);
     setError(null);
 
-    identifyFood({ filePath, signal: controller.signal }).then(result => {
+    identifyFood({ filePath, mode, signal: controller.signal }).then(result => {
       if (cancelled) {
         return;
       }
@@ -47,7 +50,7 @@ export function useFoodIdentification(filePath: string): UseFoodIdentification {
       cancelled = true;
       controller.abort();
     };
-  }, [filePath, attempt]);
+  }, [filePath, mode, attempt]);
 
   return { data, loading, error, retry };
 }

@@ -62,6 +62,28 @@ describe('identifyFood', () => {
     );
   });
 
+  it('raises the token budget and timeout in pro mode', async () => {
+    mockedAxios.mockResolvedValue({ data: payload, status: 200, headers: {} });
+
+    await identifyFood({ filePath: '/tmp/photo.jpg', mode: 'pro' });
+    const pro = mockedAxios.mock.calls[0][0];
+
+    mockedAxios.mockClear();
+    await identifyFood({ filePath: '/tmp/photo.jpg', mode: 'normal' });
+    const normal = mockedAxios.mock.calls[0][0];
+
+    const tokensOf = (config: any) =>
+      config.data
+        .getParts()
+        .find((part: any) => part.fieldName === 'max_new_tokens').string;
+
+    expect(tokensOf(pro)).toBe('512');
+    expect(tokensOf(normal)).toBe('64');
+    expect(pro.timeout).toBeGreaterThan(normal.timeout);
+    // The API rejects anything above 1024.
+    expect(Number(tokensOf(pro))).toBeLessThanOrEqual(1024);
+  });
+
   it('flags a connection failure as a network error', async () => {
     mockedAxios.mockRejectedValue(
       Object.assign(new Error('Network Error'), { response: undefined }),

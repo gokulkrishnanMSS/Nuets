@@ -14,10 +14,15 @@ function ScanMealButton({ onPress }: ScanMealButtonProps) {
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.textPrimary,
+        backgroundColor: colors.positive,
         borderRadius: radius.lg,
         paddingVertical: 14,
         paddingHorizontal: spacing.lg,
+        shadowColor: colors.positive,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 3,
         opacity: pressed ? 0.85 : 1,
       })}
     >
@@ -26,7 +31,7 @@ function ScanMealButton({ onPress }: ScanMealButtonProps) {
           width: 34,
           height: 34,
           borderRadius: 17,
-          backgroundColor: 'rgba(255,255,255,0.14)',
+          backgroundColor: 'rgba(255,255,255,0.22)',
           alignItems: 'center',
           justifyContent: 'center',
           marginRight: spacing.md,
@@ -43,7 +48,7 @@ function ScanMealButton({ onPress }: ScanMealButtonProps) {
         </Text>
         <Text
           style={{
-            color: 'rgba(255,255,255,0.6)',
+            color: 'rgba(255,255,255,0.75)',
             fontSize: 12,
             marginTop: 1,
           }}

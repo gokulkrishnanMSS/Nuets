@@ -56,4 +56,9 @@ export const API_ROUTES = {
       return `${API_BASE_URL}/food/scans/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`;
     },
   },
+  recipe: {
+    get generate() {
+      return `${API_BASE_URL}/recipe/generate`;
+    },
+  },
 };

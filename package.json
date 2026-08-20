@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "SET PATH=C:\\Users\\gokul\\AppData\\Local\\Android\\Sdk\\platform-tools;%PATH% && adb reverse tcp:8000 tcp:8000 && react-native run-android",
+    "android": "adb reverse tcp:8000 tcp:8000 && react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
@@ -16,6 +16,7 @@
     "@react-navigation/native-stack": "^7.18.8",
     "axios": "^1.19.0",
     "i": "^0.3.7",
+    "lottie-react-native": "^7.4.0",
     "npm": "^11.19.0",
     "paths-js": "^0.4.11",
     "react": "19.2.3",
@@ -23,10 +24,12 @@
     "react-native-chart-kit": "^7.0.2",
     "react-native-nitro-image": "^0.15.1",
     "react-native-nitro-modules": "^0.36.5",
+    "react-native-reanimated": "^4.6.0-nightly-20260818-2a121ea78",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.27.0",
     "react-native-svg": "^15.15.5",
-    "react-native-vision-camera": "^5.2.2"
+    "react-native-vision-camera": "^5.2.2",
+    "react-native-worklets": "^0.13.0-nightly-20260818-2a121ea78"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

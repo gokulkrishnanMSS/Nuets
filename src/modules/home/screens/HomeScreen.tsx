@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,13 +23,12 @@ function HomeScreen() {
   const { metrics, loading, error } = useHomeMetrics();
 
   const [lastScan, setLastScan] = React.useState<FoodIdentification | null>(null);
-  const [query, setQuery] = React.useState('');
   const [scans, setScans] = React.useState<ScanRecord[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchRecentScans(query).then(setScans);
-    }, [query])
+      fetchRecentScans().then(setScans);
+    }, [])
   );
 
   useFocusEffect(
@@ -113,34 +112,42 @@ function HomeScreen() {
         </Text>
       </View>
 
-      <View style={{ marginBottom: spacing.lg }}>
-        <TextInput
-          style={{
-            backgroundColor: colors.surface,
-            borderRadius: 12,
-            paddingHorizontal: spacing.md,
-            paddingVertical: spacing.md,
-            fontSize: 15,
-            color: colors.textPrimary,
-            borderWidth: 1,
-            borderColor: colors.border,
-          }}
-          placeholder="Search recent scans..."
-          placeholderTextColor={colors.textMuted}
-          value={query}
-          onChangeText={setQuery}
-        />
-      </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Search recent scans"
+        onPress={() => navigation.navigate('Search')}
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: colors.surface,
+          borderRadius: 12,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.md,
+          borderWidth: 1,
+          borderColor: colors.border,
+          marginBottom: spacing.lg,
+          opacity: pressed ? 0.85 : 1,
+        })}
+      >
+        <Text style={{ fontSize: 15, marginRight: spacing.sm }}>🔍</Text>
+        <Text style={{ fontSize: 15, color: colors.textMuted }}>
+          Search recent scans...
+        </Text>
+      </Pressable>
 
       <ScansChartCard
         scansHistory={metrics.scansHistory}
         scansToday={metrics.scansToday}
       />
 
+      <View style={{ marginTop: spacing.md }}>
+        <ScanMealButton onPress={() => navigation.navigate('Camera')} />
+      </View>
+
       {scans.length > 0 && (
         <View style={{ marginTop: spacing.lg, marginBottom: spacing.lg }}>
           <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginBottom: spacing.sm, letterSpacing: 1 }}>
-            {query === '' ? 'RECENT SCANS' : 'SEARCH RESULTS'}
+            RECENT SCANS
           </Text>
           {scans.map(scan => (
             <View key={scan.id} style={{ marginBottom: spacing.md }}>
@@ -149,10 +156,6 @@ function HomeScreen() {
           ))}
         </View>
       )}
-
-      <View style={{ marginTop: spacing.md }}>
-        <ScanMealButton onPress={() => navigation.navigate('Camera')} />
-      </View>
 
       <View style={{ marginTop: spacing.md }}>
         {lastScan ? (
