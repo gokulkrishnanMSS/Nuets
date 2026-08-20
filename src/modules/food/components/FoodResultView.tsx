@@ -176,8 +176,12 @@ function FoodResultView({
 
   const TONES = [colors.positive, colors.caution, colors.warning];
 
+  // The chef animation is drawn on white; matching the surface behind it keeps
+  // the loading state from showing a grey frame around the artwork.
+  const backdrop = loading ? colors.surface : colors.background;
+
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: backdrop }}>
       {showHandle && (
         <View style={{ alignItems: 'center', paddingVertical: spacing.sm }}>
           <View
@@ -192,7 +196,7 @@ function FoodResultView({
       )}
 
       <ScrollView
-        style={{ flex: 1 }}
+        style={{ flex: 1, backgroundColor: backdrop }}
         contentContainerStyle={{
           padding: spacing.lg,
           paddingTop: showHandle ? spacing.sm : spacing.lg,

@@ -7,6 +7,7 @@ module.exports = {
       '|@react-navigation|react-native-screens|react-native-svg' +
       '|react-native-safe-area-context|react-native-vision-camera' +
       '|@react-native-async-storage|lottie-react-native|react-native-chart-kit' +
-      '|react-native-reanimated|react-native-worklets)/)',
+      '|react-native-reanimated|react-native-worklets'
+      + '|react-native-sqlite-storage)/)',
   ],
 };

@@ -38,9 +38,12 @@ function RecipeScreen({ route, navigation }: RecipeScreenProps) {
       ].filter(macro => macro.value != null)
     : [];
 
+  // Matches the chef animation's white artwork while it is on screen.
+  const backdrop = loading ? colors.surface : colors.background;
+
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
+      style={{ flex: 1, backgroundColor: backdrop }}
       contentContainerStyle={{
         padding: spacing.lg,
         paddingBottom: insets.bottom + spacing.xl,

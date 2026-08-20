@@ -2,8 +2,8 @@ import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FoodIdentification } from '../../food/types';
+import { getLatestScan, parseStoredScan } from '../../food/store';
 import { ScanRecord } from '../types';
 import { colors, spacing } from '../../../common/constants';
 import {
@@ -33,15 +33,9 @@ function HomeScreen() {
 
   useFocusEffect(
     React.useCallback(() => {
-      AsyncStorage.getItem('@last_scan').then(val => {
-        if (val) {
-          try {
-            setLastScan(JSON.parse(val));
-          } catch (e) {
-            console.error(e);
-          }
-        }
-      });
+      getLatestScan()
+        .then(row => setLastScan(row ? parseStoredScan(row) : null))
+        .catch(err => console.error('Failed to read the last scan', err));
     }, [])
   );
 
@@ -116,7 +110,7 @@ function HomeScreen() {
         accessibilityRole="button"
         accessibilityLabel="Search recent scans"
         onPress={() => navigation.navigate('Search')}
-        style={({ pressed }) => ({
+        style={{
           flexDirection: 'row',
           alignItems: 'center',
           backgroundColor: colors.surface,
@@ -126,8 +120,7 @@ function HomeScreen() {
           borderWidth: 1,
           borderColor: colors.border,
           marginBottom: spacing.lg,
-          opacity: pressed ? 0.85 : 1,
-        })}
+        }}
       >
         <Text style={{ fontSize: 15, marginRight: spacing.sm }}>🔍</Text>
         <Text style={{ fontSize: 15, color: colors.textMuted }}>
@@ -135,10 +128,7 @@ function HomeScreen() {
         </Text>
       </Pressable>
 
-      <ScansChartCard
-        scansHistory={metrics.scansHistory}
-        scansToday={metrics.scansToday}
-      />
+      <ScansChartCard />
 
       <View style={{ marginTop: spacing.md }}>
         <ScanMealButton onPress={() => navigation.navigate('Camera')} />

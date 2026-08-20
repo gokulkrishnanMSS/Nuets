@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../../../common/services';
 import { identifyFood } from '../services';
+import { saveScan } from '../store';
 import { FoodIdentification, ScanMode } from '../types';
 
 type UseFoodIdentification = {
@@ -35,7 +35,10 @@ export function useFoodIdentification(
       }
       if (result.data) {
         setData(result.data);
-        AsyncStorage.setItem('@last_scan', JSON.stringify(result.data)).catch(console.error);
+        // Stored against today's date so the week chart can count it.
+        saveScan(result.data, { mode, photoPath: filePath }).catch(
+          console.error,
+        );
       } else {
         setError(
           result.isNetworkError
