@@ -18,9 +18,12 @@ export type NutritionInfo = {
 
 /** Response body of `POST /food/identify`. */
 export type FoodIdentification = {
+  id?: number;
   result: string;
   ingredients?: string[];
   nutrition_info?: NutritionInfo[];
+  /** Whole-dish total from the model; may be absent on older stored scans. */
+  calories_kcal?: number;
   filename: string;
   device: string;
 };

@@ -20,8 +20,15 @@ const textOf = (node: unknown): string[] => {
   if (Array.isArray(node)) {
     return node.flatMap(textOf);
   }
-  if (node && typeof node === 'object' && 'children' in node) {
-    return textOf((node as { children: unknown }).children);
+  if (node && typeof node === 'object' && node !== null) {
+    const acc: string[] = [];
+    if ('props' in node && (node as any).props?.accessibilityLabel) {
+      acc.push((node as any).props.accessibilityLabel);
+    }
+    if ('children' in node) {
+      acc.push(...textOf((node as { children: unknown }).children));
+    }
+    return acc;
   }
   return [];
 };
@@ -47,13 +54,8 @@ test('home screen renders the daily summary and camera entry point', async () =>
   );
 
   expect(text).toContain('Nuets');
-  expect(text).toContain('TODAY');
-  expect(text).toContain('Health Score');
-  expect(text).toContain('7.4');
-  expect(text).toContain('1,840');
-  expect(text).toContain('Protein');
-  expect(text).toContain('RECENT MEALS');
-  expect(text).toContain('Avocado toast');
+  expect(text).toContain('Search recent scans');
+  expect(text).toContain('SCAN HISTORY');
   expect(text).toContain('Scan a meal');
 });
 

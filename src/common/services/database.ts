@@ -96,10 +96,10 @@ export async function getSetting(key: string): Promise<string | null> {
 
 /** Writes one persisted setting, replacing any previous value. */
 export async function setSetting(key: string, value: string): Promise<void> {
-  await execute(
-    'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
-    [key, value],
-  );
+  await execute('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [
+    key,
+    value,
+  ]);
 }
 
 /** Test seam — drops the cached handle so the next call reopens. */

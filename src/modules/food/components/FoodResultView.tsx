@@ -6,6 +6,7 @@ import { colors, radius, spacing } from '../../../common/constants';
 import { useFoodIdentification } from '../hooks';
 import { DEFAULT_SCAN_MODE, SCAN_MODES } from '../constants';
 import type { ScanMode } from '../types';
+import { cleanIngredients, totalCaloriesOf } from '../utils';
 
 type FoodResultViewProps = {
   /** Filesystem path from the camera (no `file://`). */
@@ -129,19 +130,21 @@ function FoodResultView({
   showHandle = false,
 }: FoodResultViewProps) {
   const insets = useSafeAreaInsets();
-  const { data, loading, error, retry } = useFoodIdentification(photoPath, mode);
+  const { data, loading, error, notFood, retry } = useFoodIdentification(
+    photoPath,
+    mode,
+  );
 
-  const ingredients = data?.ingredients || [];
+  const ingredients = cleanIngredients(data?.ingredients);
   const nutritionInfo = data?.nutrition_info || [];
 
-  let totalCalories = 0;
+  const totalCalories = data ? totalCaloriesOf(data) : 0;
   let totalProtein = 0;
   let totalFat = 0;
   let totalCarbs = 0;
 
   if (nutritionInfo.length > 0) {
     nutritionInfo.forEach(item => {
-      totalCalories += item.calories_kcal || 0;
       totalProtein += item.protein_g || 0;
       totalFat += item.fat_g || 0;
       totalCarbs += item.carbs_g || 0;
@@ -204,7 +207,7 @@ function FoodResultView({
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero image, once there is a result to caption it. */}
+        {/* Hero image, once the request has settled. */}
         {!loading && (
           <View
             style={{
@@ -289,6 +292,35 @@ function FoodResultView({
           </View>
         )}
 
+        {/* Not food — the API returned 404 and nothing was saved. */}
+        {!loading && notFood && (
+          <Card style={{ marginTop: spacing.md, alignItems: 'center' }}>
+            <Text style={{ fontSize: 32 }}>🤔</Text>
+            <Text
+              style={{
+                marginTop: spacing.sm,
+                fontSize: 16,
+                fontWeight: '700',
+                color: colors.textPrimary,
+              }}
+            >
+              That doesn't look like food
+            </Text>
+            <Text
+              style={{
+                marginTop: spacing.xs,
+                fontSize: 13,
+                lineHeight: 19,
+                color: colors.textSecondary,
+                textAlign: 'center',
+              }}
+            >
+              Nothing was added to your history. Point the camera at a plate and
+              try again.
+            </Text>
+          </Card>
+        )}
+
         {/* Error State */}
         {!loading && error && (
           <Card style={{ marginTop: spacing.md, padding: spacing.lg }}>
@@ -337,6 +369,54 @@ function FoodResultView({
         {/* Result & Ingredients State */}
         {!loading && !error && data && (
           <>
+            {/* Whole-dish calories, straight from the API. */}
+            {totalCalories > 0 && (
+              <Card
+                style={{
+                  marginTop: spacing.md,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <View>
+                  <Text style={sectionTitleStyle}>TOTAL CALORIES</Text>
+                  <Text
+                    style={{
+                      fontSize: 28,
+                      fontWeight: '800',
+                      color: colors.textPrimary,
+                      letterSpacing: -0.6,
+                    }}
+                  >
+                    {Math.round(totalCalories)}
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: '600',
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      {' '}
+                      kcal
+                    </Text>
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 24,
+                    backgroundColor: colors.positiveSoft,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 22 }}>🔥</Text>
+                </View>
+              </Card>
+            )}
+
             {/* Ingredients Section */}
             {ingredients.length > 0 && (
               <Card style={{ marginTop: spacing.md }}>
@@ -569,6 +649,25 @@ function FoodResultView({
               </Text>
             </Pressable>
           </>
+        )}
+
+        {!loading && !data && (
+          <Pressable
+            onPress={onDismiss}
+            style={{
+              marginTop: spacing.md,
+              backgroundColor: colors.textPrimary,
+              borderRadius: radius.md,
+              paddingVertical: 14,
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{ color: colors.surface, fontSize: 15, fontWeight: '700' }}
+            >
+              {dismissLabel}
+            </Text>
+          </Pressable>
         )}
       </ScrollView>
     </View>

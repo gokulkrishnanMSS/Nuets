@@ -30,6 +30,7 @@ export async function callApi<T>(
     const errorMessage =
       err.response?.data?.error ||
       err.response?.data?.message ||
+      err.response?.data?.detail ||
       err.message ||
       'Something went wrong';
 

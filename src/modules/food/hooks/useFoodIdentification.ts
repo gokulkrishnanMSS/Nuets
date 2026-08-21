@@ -8,6 +8,8 @@ type UseFoodIdentification = {
   data: FoodIdentification | null;
   loading: boolean;
   error: string | null;
+  /** The API rejected the photo as not being food (HTTP 404). */
+  notFood: boolean;
   retry: () => void;
 };
 
@@ -18,6 +20,7 @@ export function useFoodIdentification(
   const [data, setData] = useState<FoodIdentification | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notFood, setNotFood] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   const retry = useCallback(() => setAttempt(current => current + 1), []);
@@ -28,6 +31,7 @@ export function useFoodIdentification(
 
     setLoading(true);
     setError(null);
+    setNotFood(false);
 
     identifyFood({ filePath, mode, signal: controller.signal }).then(result => {
       if (cancelled) {
@@ -39,6 +43,11 @@ export function useFoodIdentification(
         saveScan(result.data, { mode, photoPath: filePath }).catch(
           console.error,
         );
+      } else if (result.status === 404) {
+        // 404 means the photo is not food. Nothing is written to the database,
+        // so it never reaches the history or the week counts.
+        setNotFood(true);
+        setData(null);
       } else {
         setError(
           result.isNetworkError
@@ -55,5 +64,5 @@ export function useFoodIdentification(
     };
   }, [filePath, mode, attempt]);
 
-  return { data, loading, error, retry };
+  return { data, loading, error, notFood, retry };
 }

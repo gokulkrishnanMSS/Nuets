@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Solid green background -->
+    <!-- Solid teal/green background -->
     <item>
-        <color android:color="#3a9e57"/>
+        <color android:color="#0eaa81"/>
     </item>
     <!-- Full splash image centered -->
     <item>

@@ -1,25 +1,39 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { Card, SegmentedMeter } from '../../../common/components';
 import { colors, spacing } from '../../../common/constants';
 import { FoodIdentification } from '../../food/types';
+import { totalCaloriesOf } from '../../food/utils';
 
 type LastScanCardProps = {
   data: FoodIdentification;
+  onDelete?: () => void;
 };
 
 const TONES = [colors.positive, colors.caution, colors.warning];
 
-function LastScanCard({ data }: LastScanCardProps) {
+function LastScanCard({ data, onDelete }: LastScanCardProps) {
+  const handleDeletePress = () => {
+    if (!onDelete) return;
+    Alert.alert(
+      'Delete Scan',
+      'Are you sure you want to delete this scan?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: onDelete },
+      ],
+      { cancelable: true },
+    );
+  };
+
   const nutritionInfo = data.nutrition_info || [];
-  let totalCalories = 0;
+  const totalCalories = totalCaloriesOf(data);
   let totalProtein = 0;
   let totalFat = 0;
   let totalCarbs = 0;
 
   if (nutritionInfo.length > 0) {
     nutritionInfo.forEach(item => {
-      totalCalories += item.calories_kcal || 0;
       totalProtein += item.protein_g || 0;
       totalFat += item.fat_g || 0;
       totalCarbs += item.carbs_g || 0;
@@ -61,10 +75,23 @@ function LastScanCard({ data }: LastScanCardProps) {
         >
           LAST SCANNED MEAL
         </Text>
-        <View style={{ backgroundColor: colors.positiveSoft, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>
-          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.positive }}>
-            {Math.round(totalCalories)} kcal
-          </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ backgroundColor: colors.positiveSoft, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>
+            <Text style={{ fontSize: 12, fontWeight: '700', color: colors.positive }}>
+              {Math.round(totalCalories)} kcal
+            </Text>
+          </View>
+          {onDelete && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Delete scan"
+              onPress={handleDeletePress}
+              style={{ marginLeft: spacing.xs, paddingHorizontal: 6, paddingVertical: 2 }}
+              hitSlop={8}
+            >
+              <Text style={{ fontSize: 13 }}>🗑️</Text>
+            </Pressable>
+          )}
         </View>
       </View>
 

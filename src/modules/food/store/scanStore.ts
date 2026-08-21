@@ -1,5 +1,6 @@
 import { execute, query, toDayKey } from '../../../common';
 import { FoodIdentification, ScanMode } from '../types';
+import { totalCaloriesOf } from '../utils';
 
 /** One stored scan, as it comes back out of SQLite. */
 export type StoredScan = {
@@ -28,12 +29,6 @@ const titleOf = (result: string): string | null => {
   return match ? match[1].trim() : null;
 };
 
-const caloriesOf = (data: FoodIdentification): number =>
-  (data.nutrition_info || []).reduce(
-    (total, item) => total + (item.calories_kcal || 0),
-    0,
-  );
-
 /** Persists one identification against the day it happened. */
 export async function saveScan(
   data: FoodIdentification,
@@ -55,7 +50,7 @@ export async function saveScan(
       data.device ?? null,
       options.mode ?? null,
       options.photoPath ?? null,
-      caloriesOf(data),
+      totalCaloriesOf(data),
       JSON.stringify(data.ingredients ?? []),
       JSON.stringify(data.nutrition_info ?? []),
     ],
@@ -76,12 +71,19 @@ export function parseStoredScan(row: StoredScan): FoodIdentification {
   };
 
   return {
+    id: row.id,
     result: row.result,
     ingredients: parse(row.ingredients, [] as string[]),
     nutrition_info: parse(row.nutrition_info, []),
+    calories_kcal: row.calories ?? 0,
     filename: row.filename ?? '',
     device: row.device ?? '',
   };
+}
+
+/** Deletes a scan record from the SQLite database by ID. */
+export async function deleteScan(id: number): Promise<void> {
+  await execute('DELETE FROM scans WHERE id = ?', [id]);
 }
 
 export async function getLatestScan(): Promise<StoredScan | null> {

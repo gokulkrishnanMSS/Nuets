@@ -1,21 +1,27 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { FoodIdentification } from '../../food/types';
-import { getLatestScan, parseStoredScan } from '../../food/store';
-import { ScanRecord } from '../types';
+import { deleteScan, getLatestScan, getRecentScans, parseStoredScan } from '../../food/store';
 import { colors, spacing } from '../../../common/constants';
 import {
   LastScanCard,
-  MacroCard,
   ScanMealButton,
   ScansChartCard,
   TipCard,
 } from '../components';
 import { useHomeMetrics } from '../hooks';
-import { fetchRecentScans } from '../services';
 import { formatToday, greetingFor } from '../utils';
+
+const LOGO = require('../../../assets/images/logo.png');
 
 function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -23,21 +29,34 @@ function HomeScreen() {
   const { metrics, loading, error } = useHomeMetrics();
 
   const [lastScan, setLastScan] = React.useState<FoodIdentification | null>(null);
-  const [scans, setScans] = React.useState<ScanRecord[]>([]);
+  const [scans, setScans] = React.useState<FoodIdentification[]>([]);
+
+  const loadData = React.useCallback(async () => {
+    try {
+      const rows = await getRecentScans(10);
+      setScans(rows.map(parseStoredScan));
+      const latest = await getLatestScan();
+      setLastScan(latest ? parseStoredScan(latest) : null);
+    } catch (err) {
+      console.error('Failed to read scans from SQLite', err);
+    }
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchRecentScans().then(setScans);
-    }, [])
+      loadData();
+    }, [loadData])
   );
 
-  useFocusEffect(
-    React.useCallback(() => {
-      getLatestScan()
-        .then(row => setLastScan(row ? parseStoredScan(row) : null))
-        .catch(err => console.error('Failed to read the last scan', err));
-    }, [])
-  );
+  const handleDeleteScan = async (id?: number) => {
+    if (id === undefined) return;
+    try {
+      await deleteScan(id);
+      await loadData();
+    } catch (err) {
+      console.error('Failed to delete scan', err);
+    }
+  };
 
   if (loading || !metrics) {
     return (
@@ -94,16 +113,23 @@ function HomeScreen() {
           </Text>
         </View>
 
-        <Text
+        <View
           style={{
-            fontSize: 18,
-            fontWeight: '700',
-            color: colors.textPrimary,
-            letterSpacing: -0.3,
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            overflow: 'hidden',
+            borderWidth: 1,
+            borderColor: colors.border,
           }}
         >
-          Nuets
-        </Text>
+          <Image
+            source={LOGO}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+            accessibilityLabel="Nuets"
+          />
+        </View>
       </View>
 
       <Pressable
@@ -134,27 +160,28 @@ function HomeScreen() {
         <ScanMealButton onPress={() => navigation.navigate('Camera')} />
       </View>
 
-      {scans.length > 0 && (
-        <View style={{ marginTop: spacing.lg, marginBottom: spacing.lg }}>
+      {scans.length > 0 ? (
+        <View style={{ marginTop: spacing.lg }}>
           <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginBottom: spacing.sm, letterSpacing: 1 }}>
             RECENT SCANS
           </Text>
-          {scans.map(scan => (
-            <View key={scan.id} style={{ marginBottom: spacing.md }}>
-              <LastScanCard data={scan as any} />
+          {scans.map((scan, idx) => (
+            <View key={scan.id ?? idx} style={{ marginBottom: spacing.md }}>
+              <LastScanCard
+                data={scan}
+                onDelete={scan.id !== undefined ? () => handleDeleteScan(scan.id) : undefined}
+              />
             </View>
           ))}
         </View>
-      )}
-
-      <View style={{ marginTop: spacing.md }}>
-        {lastScan ? (
-          <LastScanCard data={lastScan} />
-        ) : (
-          <MacroCard macros={metrics.macros} />
-        )}
-      </View>
-
+      ) : lastScan ? (
+        <View style={{ marginTop: spacing.md }}>
+          <LastScanCard
+            data={lastScan}
+            onDelete={lastScan.id !== undefined ? () => handleDeleteScan(lastScan.id) : undefined}
+          />
+        </View>
+      ) : null}
 
       <View style={{ marginTop: spacing.md }}>
         <TipCard tip={metrics.tip} />
